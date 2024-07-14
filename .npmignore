@@ -36,6 +36,5 @@ node_modules
 ## ignore some files from 2.x branch
 
 .nyc_output
-lib/index.js
 lib/index.es.js
 package-lock.json
