@@ -7,6 +7,7 @@
 
 var parse_url = require('url').parse;
 var resolve_url = require('url').resolve;
+var URLl = require('url');
 var http = require('http');
 var https = require('https');
 var zlib = require('zlib');
@@ -22,6 +23,15 @@ var FetchError = require('./lib/fetch-error');
 module.exports = Fetch;
 // es6 default export compatibility
 module.exports.default = module.exports;
+
+const isDomainOrSubdomain = function(destination, original) {
+	const orig = URLl.parse(original).hostname;
+	const dest = URLl.parse(destination).hostname;
+
+	return orig === dest || (
+		orig[orig.length - dest.length - 1] === '.' && orig.endsWith(dest)
+	);
+};
 
 /**
  * Fetch class
@@ -163,6 +173,28 @@ function Fetch(url, opts) {
 				}
 
 				options.counter++;
+
+				const location = res.headers['location'] || null;
+				var locationURL = null;
+
+				try {
+					locationURL = location === null ? null : URLl.resolve(URLl.parse(options.url), location).toString();
+				} catch (err) {
+					// error here can only be invalid URL in Location: header
+					// do not throw when options.redirect == manual
+					// let the user extract the errorneous redirect URL
+					if (options.redirect !== 'manual') {
+						reject(new FetchError('uri requested responds with an invalid redirect URL: ' + location, 'invalid-redirect'));
+						finalize();
+						return;
+					}
+				}
+
+				if (!isDomainOrSubdomain(options.url, locationURL)) {
+					['authorization', 'www-authenticate', 'cookie', 'cookie2'].forEach(function(name) {
+						delete options.headers[name];
+					})
+				}
 
 				resolve(Fetch(resolve_url(options.url, res.headers.location), options));
 				return;

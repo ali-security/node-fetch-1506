@@ -67,6 +67,12 @@ TestServer.prototype.router = function(req, res) {
 		}));
 	}
 
+	if (p.slice(0,14) == '/redirect-to/3') {
+		res.statusCode = p.slice(13, 16);
+		res.setHeader('Location', p.slice(17));
+		res.end();
+	}
+
 	if (p === '/gzip') {
 		res.statusCode = 200;
 		res.setHeader('Content-Type', 'text/plain');
