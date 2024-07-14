@@ -7,7 +7,7 @@
 
 var parse_url = require('url').parse;
 var resolve_url = require('url').resolve;
-var URLl = require('url');
+var URL = require('url');
 var http = require('http');
 var https = require('https');
 var zlib = require('zlib');
@@ -25,8 +25,8 @@ module.exports = Fetch;
 module.exports.default = module.exports;
 
 const isDomainOrSubdomain = function(destination, original) {
-	const orig = URLl.parse(original).hostname;
-	const dest = URLl.parse(destination).hostname;
+	const orig = URL.parse(original).hostname;
+	const dest = URL.parse(destination).hostname;
 
 	return orig === dest || (
 		orig[orig.length - dest.length - 1] === '.' && orig.endsWith(dest)
@@ -178,7 +178,7 @@ function Fetch(url, opts) {
 				var locationURL = null;
 
 				try {
-					locationURL = location === null ? null : URLl.resolve(URLl.parse(options.url), location).toString();
+					locationURL = location === null ? null : URL.resolve(URL.parse(options.url), location).toString();
 				} catch (err) {
 					// error here can only be invalid URL in Location: header
 					// do not throw when options.redirect == manual
